@@ -6,6 +6,7 @@ import 'package:kagemuwa_umzug_web/provider/rater_provider.dart';
 import 'package:kagemuwa_umzug_web/ui/rater_settings_view.dart';
 import 'package:kagemuwa_umzug_web/ui/thankyou_view.dart';
 import 'package:kagemuwa_umzug_common/data/model/rater.dart';
+import 'package:kagemuwa_umzug_web/ui/widgets/custom_alert_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:emojis/emoji.dart';
 import 'package:kagemuwa_umzug_common/data/model/parade_number.dart';
@@ -819,7 +820,17 @@ class _RatingViewState extends State<RatingView> {
           setState(() {});
         }
       } else { /// not all ratings have been saved
-        await showDialog(
+        await showDialog(context: context, builder: (BuildContext context) {return CustomAlertDialog();});
+        /*await AwesomeDialog(
+            context: context,
+            dialogType: DialogType.error,
+            animType: AnimType.rightSlide,
+            title: 'Achtung!',
+            desc: 'Achtung - Deine Daten wurden nicht korrekt gesendet!\nMöglicherweise hast Du keine Internetverbindung!\nBitte gehe an einen Ort, wo Du eine Internetverbindung hast.\nDie Daten werden dann automatisch gespeichert.\nBitte schließe den Browser nicht, danke.',
+            btnCancelOnPress: () {},
+            btnOkOnPress: () {},
+        ).show();*/
+        /*await showDialog(
           context: context,
           builder: (context) {
             return AlertDialog(
@@ -837,7 +848,7 @@ class _RatingViewState extends State<RatingView> {
               ],
             );
           },
-        );
+        );*/
       }
     }
   }
