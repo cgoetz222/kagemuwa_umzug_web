@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:kagemuwa_umzug_web/ui/widgets/card_menu_item.dart';
 import 'package:flutter_html/flutter_html.dart';
 
@@ -79,6 +80,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   Timer? timer;
   int imageIndex = 0;
+  bool connected = false;
   final images = [
     Image.asset("assets/kagemuwa_romo_00.jpg", key: const Key('1'),),
     Image.asset("assets/kagemuwa_romo_01.jpg", key: const Key('2'),),
@@ -111,11 +113,163 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<bool> load() async {
+    connected = await InternetConnection().hasInternetAccess;
+
     return true;
   }
 
   @override
   Widget build(BuildContext context) {
+    const double spacing = 10.0;
+    double height = MediaQuery.of(context).size.height;
+    double width = MediaQuery.of(context).size.width;
+    double picWidth = width;
+    double picHeight;
+    if(height >= 600) {
+      picHeight = width * widget.RATIO;
+    } else {
+      picWidth -= 20;
+      picHeight = picWidth * widget.RATIO;
+    }
+
+    double buttonSize = (height - width - 2.0 * spacing) * 7.0 / 10.0;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title, textScaler: TextScaler.linear(width / 500.0), textAlign: TextAlign.center,),
+      ),
+      drawer: Drawer(
+        backgroundColor: KAGEMUWAColors.menuBackgroundColor,
+        // Add a ListView to the drawer. This ensures the user can scroll
+        // through the options in the drawer if there isn't enough vertical
+        // space to fit everything.
+        child: ListView(
+          // Important: Remove any padding from the ListView.
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: const BoxDecoration(
+                color: KAGEMUWAColors.menuBackgroundColor,
+              ),
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: Image.asset("assets/WassersucherLogo.png"),
+              ),
+            ),
+            ListTile(
+              title: const Text('Login'),
+              leading: const Icon(Icons.login_outlined),
+              onTap: () {
+                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const LoginView()));
+              },
+            ),
+            ListTile(
+              title: const Text('Testzugang'),
+              leading: const Icon(Icons.explore_outlined),
+              onTap: () {
+                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const DemoView()));
+              },
+            ),
+            ListTile(
+              title: const Text('Über'),
+              leading: const Icon(Icons.info_outline),
+              onTap: () {
+                showAlertDialogAbout(context);
+              },
+            ),
+            ListTile(
+              title: const Text('Datenschutz'),
+              leading: const Icon(Icons.policy_outlined),
+              onTap: () {
+                showAlertDialogPolicy(context);
+              },
+            ),
+          ],
+        ),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            Text("Mudi HAJO\nGroßer Odenwälder\nRosenmontagsumzug", style: KAGEMUWAStyles.startPageTextFieldStyle, textAlign: TextAlign.center, textScaler: TextScaler.linear(height / 750.0)),
+            const Spacer(flex: 1,),
+            SizedBox(width: buttonSize, height: buttonSize,
+                child: FutureBuilder<bool>(
+                    future: load(),
+                    builder: (context, AsyncSnapshot<bool> snapshot) {
+                      Widget widget;
+                      if(connected) {
+                        widget = InkWell(
+                            child: CardMenuItemWidget(size: buttonSize,
+                                description: 'Login',
+                                iconData: Icons.login_outlined,
+                                color: KAGEMUWAColors.menuCardGrey),
+                            onTap: () {
+                              Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(builder: (
+                                      context) => const LoginView()));
+                            },
+                          );
+                      } else {
+                        debugPrint("kein Internet");
+                        widget = Container(
+                          color: KAGEMUWAColors.menuCardGrey,
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            alignment: Alignment.topCenter,
+                            children: [
+                              SizedBox(
+                                height: 300,
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(10, 70, 10, 10),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      SizedBox(height: 30,),
+                                      Text("Achtung", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+                                      SizedBox(height: 5,),
+                                      Text("Keine Internetverbindung!", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                      SizedBox(height: 20,),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                top: -10,
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.redAccent,
+                                  radius: 50,
+                                  child: Icon(Icons.wifi_off, size: 80, color: Colors.white,),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                      return widget;
+                    }
+                ),
+            ),
+
+            const Spacer(flex: 1,),
+            SizedBox(width: picWidth, height: picHeight,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 2000),
+                switchInCurve: Curves.easeIn,
+                switchOutCurve: Curves.easeOut,
+                child: images[imageIndex],
+              ),
+            )
+                /*: Container(),*/
+          ],
+        ),
+        //)
+      ),
+      //),
+    );
+  }
+  /*
+    Widget build(BuildContext context) {
     const double spacing = 10.0;
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
@@ -191,7 +345,6 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             Text("Mudi HAJO\nGroßer Odenwälder\nRosenmontagsumzug", style: KAGEMUWAStyles.startPageTextFieldStyle, textAlign: TextAlign.center, textScaler: TextScaler.linear(height / 750.0)),
             const Spacer(flex: 1,),
-            //height > 500 ?
             SizedBox(width: buttonSize, height: buttonSize,
                 child: InkWell(
                   child: CardMenuItemWidget(size: buttonSize, description: 'Login', iconData: Icons.login_outlined, color: KAGEMUWAColors.menuCardGrey),
@@ -200,23 +353,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                 )
             ),
-                /*: InkWell(
-              child: Card(
-                margin: const EdgeInsets.all(20),
-                child: Column(
-                  children: <Widget> [
-                    Text('  login  ', textAlign: TextAlign.center, style: KAGEMUWAStyles.menuCardStyle, textScaler: TextScaler.linear(width / 200.0),),
-                  ],
-                ),
-                shape:  OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                color: KAGEMUWAColors.menuCardGrey,
-              ),
-              onTap: () {
-                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const LoginView()));
-              },
-            ),*/
+
             const Spacer(flex: 1,),
             //height > 500 ?
             SizedBox(width: picWidth, height: picHeight,
@@ -235,7 +372,7 @@ class _MyHomePageState extends State<MyHomePage> {
       //),
     );
   }
-
+   */
   void showAlertDialogAbout(BuildContext context) async {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
 

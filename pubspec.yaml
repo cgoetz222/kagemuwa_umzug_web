@@ -48,6 +48,7 @@ dependencies:
   package_info_plus: ^9.0.0 #^3.0.2
   flutter_html: ^3.0.0-beta.2 #2.2.1
   device_info_plus: ^12.2.0
+  internet_connection_checker_plus: ^2.9.1
 
   kagemuwa_umzug_common:
     path: '../kagemuwa_umzug_common'

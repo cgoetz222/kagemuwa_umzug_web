@@ -29,6 +29,7 @@ class _LoginViewState extends State<LoginView> {
   int status = 0;
   bool loggedIn = false;
   bool changingName = false;
+  bool connected = false; // internet connection
   RaterProvider? raterProvider;
   //Barcode? _barcode;
   TextEditingController raterNameController = TextEditingController();
